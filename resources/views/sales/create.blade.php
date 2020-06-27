@@ -46,8 +46,8 @@
 	      	<select id="data_product" class="selectpicker form-control" data-live-search="true" data-live-search-placeholder="Buscar">
 	      		<option selected disabled>-- Elija el Producto --</option>
 		  		@foreach($products as $product)
-		  	  		<option value="{{ $product->name }}_{{ $product->priceV }}_{{ $product->foto }}_{{ $product->id }}">{{ $product->name }}</option>
-		  	  	@endforeach
+		  	  		<option value="{{ $product}}">{{$product->name}} </option>
+		  	  @endforeach
 	      	</select>
 	      	<input type="hidden" name="product" id="product"/>
 	    </div>
@@ -63,16 +63,18 @@
 	      <label for="validationServer05">FOTO</label>
 			<img id="foto" src='{{ asset("storage/uploads/sinFoto.jpeg") }}' width="100" height="100"/>
 	    </div>
-	    <button class="btn btn-warning" type="submit" id="agregarProducto">Agregar Producto</button>
+	    <button class="btn btn-warning" type="button" onclick="agregarProducto()">Agregar Producto</button>
 	    <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12">
 	    	  <br>
 	    	<table id="detalle" class="table table-striped table-bordered table-condensed table-hover">
 	    		<thead class="thead-dark">
-	    			<th>Opciones</th>
 	    			<th>Producto</th>
 	    			<th>Cantidad</th>
 	    			<th>Precio de Venta</th>
+            <th>Image</th>
 	    			<th>Sub Total</th>
+            <th>Opciones</th>
+
 	    		</thead>
 	    		<tfoot>
 	    			<th>TOTAL=></th>
@@ -90,6 +92,9 @@
 </div>
 @push('scripts')
 	<script>
+
+    var productsFactura = [];
+  
 		$(document).ready(function(){
 			$('#agregarProducto').click(function(){
 				agregar();
@@ -110,11 +115,15 @@
 		}
 		function mostrarDataProduct()
 		{
-			dataProduct=document.getElementById('data_product').value.split('_');
-			$("#precioV").val(dataProduct[1]);
+      
+			dataProduct = document.getElementById('data_product').value;
+      
+      productoJson = JSON.parse(dataProduct);
+
+			$("#precioV").val(productoJson.priceV);
 			var image=document.getElementById("foto");
-			image.src="http://127.0.0.1:8000/storage/"+dataProduct[2];
-			$("#product").val(dataProduct[3]);
+			image.src="http://127.0.0.1:8000/storage/"+productoJson.foto;
+			$("#product").val(productoJson);
 		}
 		function agregar()
 		{
@@ -140,6 +149,32 @@
 			console.log()
 		  document.querySelector("#num").textContent = e.detail;
 		}
+
+    function agregarProducto(){
+      var cantidad = $("#cantidad").val()
+
+      if(cantidad == ''){
+        
+        console.log('cantidad esta vacio')
+
+        return;
+      }
+
+      dataProduct = document.getElementById('data_product').value;
+
+      productoJson = JSON.parse(dataProduct)
+      
+      productoJson.qty = parseInt($("#cantidad").val());
+
+      productsFactura.push(productoJson)
+
+
+      var fila ="<tr><td>"+productoJson.name+"</td><td>"+productoJson.qty+"</td><td>"+productoJson.priceV+"</td><td><img src='http://127.0.0.1:8000/storage/"+productoJson.foto+"' alt='' width='50px' /></td><td>subTotal</td> <td><button class='btn btn-warning'>Eliminar</button></td><tr>"
+
+      $("#detalle").append(fila);
+    }
+  
+
 	</script>	
 @endpush
 @endsection
